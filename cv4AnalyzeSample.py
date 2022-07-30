@@ -26,6 +26,7 @@ class CV4_ANALYZE_SAMPLE(object):
       val += self.sarWeights[bitNum]*int(sarBits[bitNum])
     for bitNum in range(len(mdacBits)):
       val += self.mdacWeights[bitNum]*int(mdacBits[bitNum])
+    #val = np.dot(sarBits,self.sarWeights) + np.dot(mdacBits,self.mdacWeights)
     return val
 
   def convertIntTo16BitWord(self,sampInt):
@@ -52,8 +53,8 @@ class CV4_ANALYZE_SAMPLE(object):
       sarBits = sampBin[12:32]
       val = self.getColutaSampleValue(sarBits,mdacBits)
       if self.applyDdpuCorr == True :
-        #val = int(val*self.sampScaleFactor/4. - self.sampOffsetVal)
-        val = int(val*self.sampScaleFactor - self.sampOffsetVal)
+        val = int(val*self.sampScaleFactor/4. - self.sampOffsetVal)
+        #val = int(val*self.sampScaleFactor - self.sampOffsetVal)
       if self.dropOverFlowSamples == True and val > self.maxCode :
         val = 32767
       if self.dropOverFlowSamples == True and val < 0 :
