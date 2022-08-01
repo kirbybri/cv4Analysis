@@ -59,8 +59,8 @@ def main():
   cv4ProcessFile.processFile()
   #cv4ProcessFile.dumpFile()
   #cv4ProcessFile.outputTextFiles()
-  #cv4ProcessFile.outputFile()
-  #return
+  cv4ProcessFile.outputFile()
+  return
 
   if cv4ProcessFile.runResultsDict["results"] == None :
     print("NO RESULTS")

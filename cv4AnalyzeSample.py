@@ -53,8 +53,8 @@ class CV4_ANALYZE_SAMPLE(object):
       sarBits = sampBin[12:32]
       val = self.getColutaSampleValue(sarBits,mdacBits)
       if self.applyDdpuCorr == True :
-        val = int(val*self.sampScaleFactor/4. - self.sampOffsetVal)
-        #val = int(val*self.sampScaleFactor - self.sampOffsetVal)
+        #val = int(val*self.sampScaleFactor/4. - self.sampOffsetVal)
+        val = int(val*self.sampScaleFactor - self.sampOffsetVal)
       if self.dropOverFlowSamples == True and val > self.maxCode :
         val = 32767
       if self.dropOverFlowSamples == True and val < 0 :

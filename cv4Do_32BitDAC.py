@@ -47,29 +47,38 @@ def main():
   if True :
     cv4AnalyzeWaveform = CV4_ANALYZE_WAVEFORM("")
     cv4AnalyzeWaveform.runResultsDict = runResultsDict
-    cv4AnalyzeWaveform.applyDdpuCorr = True
+    cv4AnalyzeWaveform.analyzeSample.applyDdpuCorr = True
+    cv4AnalyzeWaveform.analyzeSample.sampOffsetVal = 4096
 
     for measNum in runResultsDict["results"] :
       mdacWeights = runResultsDict["results"][measNum]["attrs"]['MDACConstsDdpu']
+      mdacSum = 0
+      for mdacNum in range(1,8,1):
+        mdacSum = mdacSum + mdacWeights[mdacNum-1]
+        mdacWeights[mdacNum] = mdacWeights[mdacNum] - mdacSum
       mdacWeights[0] = 4096*4 + mdacWeights[0]
-      #mdacWeights = [x/4. for x in mdacWeights]
+      mdacWeights = [x/4. for x in mdacWeights]
       mdacWeights = mdacWeights[::-1]
+
+      #mdacWeights = runResultsDict["results"][measNum]["attrs"]['MDACConsts']
+      #mdacWeights[0] = 4096 + mdacWeights[0]
+      #mdacWeights = mdacWeights[::-1]
+      
       sarWeights = runResultsDict["results"][measNum]["attrs"]['SARConstsDdpu']
-      #ssarWeights = [x/4. for x in sarWeights]
+      sarWeights = [x/4. for x in sarWeights]
       print( mdacWeights )
       print( sarWeights )
+      cv4AnalyzeWaveform.analyzeSample.mdacWeights = mdacWeights
+      cv4AnalyzeWaveform.analyzeSample.sarWeights = sarWeights
       break
-    
-    cv4AnalyzeWaveform.analyzeSample.mdacWeights = mdacWeights
-    cv4AnalyzeWaveform.analyzeSample.sarWeights = sarWeights
 
     for measNum in runResultsDict["results"] :
-        chWf = cv4AnalyzeWaveform.getMeasChData(chId=chanName,measNum=measNum,get32Bit=True)
+        chWf32Bit = cv4AnalyzeWaveform.getMeasChData(chId=chanName,measNum=measNum,get32Bit=True)
         chWfNormal = cv4AnalyzeWaveform.getMeasChData(chId=chanName,measNum=measNum,get32Bit=False)
         print(measNum)
         dacAVal = cv4AnalyzeWaveform.runResultsDict["results"][measNum]["attrs"]["dacAVal"]
         dacBVal = cv4AnalyzeWaveform.runResultsDict["results"][measNum]["attrs"]["dacBVal"]
-        print(dacAVal,dacBVal,chWf[0],chWfNormal[0])
+        print(dacAVal,dacBVal,hex(chWf32Bit[0]),chWfNormal[0])
 
 
   return
