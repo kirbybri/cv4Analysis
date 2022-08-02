@@ -160,8 +160,11 @@ class CV4_PROCESS_RADTESTSINE(object):
       if sampNum == 0 :
         continue
       else:
+        psdVal = 0
+        if samp > 0 :
+          psdVal = 20*np.log10(samp)
         psd_x.append( fftWf_x[sampNum] )
-        psd.append( 20*np.log10(samp) )
+        psd.append( psdVal )
     sinad = self.SINAD(fourier_fftWf_y)
     enob = self.ENOB(fourier_fftWf_y)
     return psd_x,psd,sinad,enob
