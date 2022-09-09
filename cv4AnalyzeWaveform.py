@@ -71,7 +71,8 @@ class CV4_ANALYZE_WAVEFORM(object):
     if np.max(fftWf_y) <= 0 :
       return psd_x,psd,0,0
 
-    fourier_fftWf_y = fftWf_y/np.max(fftWf_y)
+    #fourier_fftWf_y = fftWf_y/np.max(fftWf_y)
+    fourier_fftWf_y = fftWf_y
     for sampNum,samp in enumerate(fourier_fftWf_y) :
       if sampNum == 0 :
         continue

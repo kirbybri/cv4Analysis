@@ -23,8 +23,9 @@ def simpleTest(resultsDict):
   cv4AnalyzeWaveform = CV4_ANALYZE_WAVEFORM("")
   cv4AnalyzeWaveform.runResultsDict = resultsDict
   for measNum in resultsDict["results"] :
+    if measNum != "Measurement_6000" : continue
     #cv4AnalyzeWaveform.printEnob(chId="channel2",measNum=measNum)
-    #cv4AnalyzeWaveform.viewWaveform(chId="channel1",measNum=measNum,doPrint=True,doPlot=True)
+    cv4AnalyzeWaveform.viewWaveform(chId="channel6",measNum=measNum,doPrint=True,doPlot=True)
     #print( measNum ,resultsDict[measNum])
     #print("\n")
     continue
@@ -125,6 +126,9 @@ def main():
   if cv4ProcessFile.runResultsDict["results"] == None :
     print("NO RESULTS")
     return
+
+  if True :
+    simpleTest(cv4ProcessFile.runResultsDict)
     
   if True :
     cv4AnalyzeWaveform = CV4_ANALYZE_WAVEFORM("")
@@ -160,6 +164,7 @@ def main():
         print(measNum,"\t",awgAmp)
         awgAmp = float(awgAmp)/512.*1000. #convert to mA
         awgAmp = round(float(awgAmp),2)
+      print("AMP VAL", awgAmp )
       attVal = 0.0
       if 'attVal' in measAttrs :
         attVal = measAttrs['attVal']
@@ -168,10 +173,12 @@ def main():
       if attVal > 0 :
         #convert AWG amp to signal current here
         awgAmp = awgAmp/(  pow(10,attVal/20.)   )
-        awgAmp = round(float(awgAmp),2)
+        awgAmp = round(float(awgAmp),5)
+      print("SIGNAL VAL", awgAmp )
+      if awgAmp < 5. : continue
       #if awgAmp < 0.3 or awgAmp > 11 : continue #LG
       #if awgAmp < 0.025 or awgAmp > 0.5 : continue #HG
-      if awgAmp < 0.1 or awgAmp > 0.5 : continue #HG
+      #if awgAmp < 0.01 or awgAmp > 0.5 : continue #HG
       #if awgAmp < 9.6 or awgAmp > 10 : continue
       if awgAmp not in ampSamples:
         ampSamples[awgAmp] = {"x":[],"y":[],"count":0}
@@ -241,7 +248,9 @@ def main():
         heights.append( ampSamples[amp]["pulseHeight"] )
         rms.append( ampSamples[amp]["pedRms"] )
       #lineResult = measureLinearity(amps,heights,rms,0,10)
-      lineResult = measureLinearity(amps,heights,rms,np.min(amps)-0.1,np.max(amps)+0.1)
+      lineResult = None
+      if len(amps) > 3:
+        lineResult = measureLinearity(amps,heights,rms,np.min(amps)-0.1,np.max(amps)+0.1)
       X_plotFit = []
       Y_plotFit = []
       resid_x = []
