@@ -40,6 +40,23 @@ def plotQuick(vals_x,vals_y,label=""):
     fig.tight_layout()
     plt.show()
 
+def findMaxPsd(chFFt_x,chFft_y,lowFreq,highFreq):
+  maxPsd = None
+  maxPsd_x = None
+  for psdNum,freq in enumerate(chFFt_x) :
+    if freq < lowFreq : continue
+    if freq > highFreq : continue
+    psdVal = chFft_y[psdNum]
+    #print( psdNum , freq , psdVal )
+    if maxPsd == None :
+      maxPsd = psdVal
+      maxPsd_x = freq
+    if psdVal > maxPsd :
+      maxPsd = psdVal
+      maxPsd_x = freq
+  print("MAX",maxPsd,maxPsd_x)
+  return maxPsd,maxPsd_x
+    
 def doSimFFt(sineAmp,sineFreq, cv4ProcessFile,chanName):
   #get average FFT for specified channel
   chFftList = [] 
@@ -86,6 +103,9 @@ def doSimFFt(sineAmp,sineFreq, cv4ProcessFile,chanName):
   chAvgFft = np.mean(chFftList,axis=0)
 
   #find tone
+  maxPsd,maxPsd_x = findMaxPsd(chFFt_x,chAvgFft,sineFreq/1.E6-0.2,sineFreq/1.E6+0.2)
+  """
+  print("HERE",maxPsd,maxPsd_x)
   maxPsd = None
   maxPsd_x = None
   for psdNum,freq in enumerate(chFFt_x) :
@@ -98,6 +118,7 @@ def doSimFFt(sineAmp,sineFreq, cv4ProcessFile,chanName):
     if psdVal > maxPsd :
       maxPsd = psdVal
       maxPsd_x = freq
+  """
   print("MAX",maxPsd,maxPsd_x)
   #find noise floor
   noiseFloorPsd = []
@@ -108,7 +129,8 @@ def doSimFFt(sineAmp,sineFreq, cv4ProcessFile,chanName):
     noiseFloorPsd.append(psdVal)
   print("NOISE FLOOR",np.mean(noiseFloorPsd),"STD",np.std(noiseFloorPsd))
   print("DIFFERENCE", maxPsd - np.mean(noiseFloorPsd) )
-  plotQuick(chFFt_x,chAvgFft,label="SIM DATA AVG FFT "+str(chanName)+" SINE AMP "+str(sineAmp)+" ADC")
+  #plotQuick(chFFt_x,chAvgFft,label="SIM DATA AVG FFT "+str(chanName)+" SINE AMP "+str(sineAmp)+" ADC")
+  return maxPsd - np.mean(noiseFloorPsd)
 
 def doSimFFt_carrier(sineAmp,sineFreq,disturbAmp,disturbFreq,cv4ProcessFile,chanName):
   #get average FFT for specified channel
@@ -210,22 +232,26 @@ def main():
     return
 
   sineFreq = 10.0E+6
-  #sineAmps = []
-  #for num in range(62,65,1):
-  #  sineAmp = num * 0.01
-  #  sineAmps.append(sineAmp)
+  sineAmps = []
+  for num in range(1,10,1):
+    sineAmp = num * 0.05
+    sineAmps.append(sineAmp)
   #sineAmps = [0.161]
   #sineAmps = [0.0]
-  #for sineAmp in sineAmps :
-  #  print("SINE AMP",sineAmp,"SINE FREQ",sineFreq)
-  #  doSimFFt(sineAmp,sineFreq, cv4ProcessFile,chanName)
+  diffs = []
+  for sineAmp in sineAmps :
+    print("SINE AMP",sineAmp,"SINE FREQ",sineFreq)
+    diff = doSimFFt(sineAmp,sineFreq, cv4ProcessFile,chanName)
+    diffs.append(round(diff,2))
+  print(sineAmps)
+  print(diffs)
 
   #carrier analysis
-  sineAmp = 32767*0.7
-  sineFreq = 5.005E+6
-  disturbAmp = 0.045
-  disturbFreq = 1E+6
-  doSimFFt_carrier(sineAmp,sineFreq,disturbAmp,disturbFreq, cv4ProcessFile,chanName)
+  #sineAmp = 32767*0.7
+  #sineFreq = 5.005E+6
+  #disturbAmp = 0.045
+  #disturbFreq = 1E+6
+  #doSimFFt_carrier(sineAmp,sineFreq,disturbAmp,disturbFreq, cv4ProcessFile,chanName)
 
   #plotQuick(chFFt_x,chAvgFft,label="AVG FFT "+str(chanName))
   #simpleTest(cv4ProcessFile.runResultsDict)
