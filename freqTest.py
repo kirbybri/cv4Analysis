@@ -20,14 +20,14 @@ def getPrimes():
   return
 
 def getFreqs():
-  sampFreq = 40.0
+  sampFreq = 36.0
   #sampFreq = 40.080169721886016
 
   targetFreq = 5
   scaleFactor = 1.
   for prime in primes :
-    #for numSamp in range(4000,8100,1):
-    for numSamp in range(512,1048,1):
+    for numSamp in range(4000,8100,1):
+    #for numSamp in range(512,1048,1):
       val = prime*sampFreq/float(numSamp)
       val = val 
       length = len(str(val).split('.')[1])

@@ -53,7 +53,7 @@ def findMaxPsd(chFFt_x,chFft_y,lowFreq,highFreq):
     if psdVal > maxPsd :
       maxPsd = psdVal
       maxPsd_x = freq
-  print("MAX",maxPsd,maxPsd_x)
+  #print("MAX",maxPsd,maxPsd_x)
   return maxPsd,maxPsd_x
 
 def main():
@@ -110,22 +110,27 @@ def main():
       if chFFt_x == None : chFFt_x = psd_x
       chFftList.append(psd)
 
-      if True :
+      #carrier analysis
+      if False :
+        expFreq = 8
+        distFreq = 0.1
         #find max tone in individual FFT
-        maxPsd,maxPsd_x = findMaxPsd(psd_x,psd,4.8,5.2)
+        maxPsd,maxPsd_x = findMaxPsd(psd_x,psd,expFreq-0.05,expFreq+0.05)
         #find sub tone
-        maxSubPsd,maxSuPsd_x = findMaxPsd(psd_x,psd,5.8,6.2)
+        maxSubPsd,maxSuPsd_x = findMaxPsd(psd_x,psd,expFreq+distFreq-0.05,expFreq+distFreq+0.05)
         diffPsd = maxPsd - maxSubPsd 
         psdDiffs.append(diffPsd)
       #plotQuick(psd_x,psd,label="FFT "+str(measNum)+" "+str(chanName))
   
-  print( "PSD DIFFS", np.mean(psdDiffs), "STD", np.std(psdDiffs) )
+  #print( "PSD DIFFS", np.mean(psdDiffs), "STD", np.std(psdDiffs) )
+  #return None
 
   if len(chFftList) == 0 :
     return None
   chAvgFft = np.mean(chFftList,axis=0)
 
   #find tone
+  """
   maxPsd = None
   maxPsd_x = None
   for psdNum,freq in enumerate(chFFt_x) :
@@ -138,18 +143,38 @@ def main():
     if psdVal > maxPsd :
       maxPsd = psdVal
       maxPsd_x = freq
+  """
+  #find disturbance impact
+  
+  expFreq = 0.1
+  maxPsd,maxPsd_x = findMaxPsd(chFFt_x,chAvgFft,expFreq-0.045,expFreq+0.045)
   print("MAX",maxPsd,maxPsd_x)
   #find noise floor
   noiseFloorPsd = []
   for psdNum,freq in enumerate(chFFt_x) :
-    if freq < 5 : continue
+    if freq < 10 : continue
     if freq == maxPsd_x : continue
     psdVal = chAvgFft[psdNum]
     noiseFloorPsd.append(psdVal)
   print("NOISE FLOOR",np.mean(noiseFloorPsd),"STD",np.std(noiseFloorPsd))
   print("DIFFERENCE", maxPsd - np.mean(noiseFloorPsd) )
-
-  plotQuick(chFFt_x,chAvgFft,label="REAL DATA AVG FFT "+str(chanName))
+  plotQuick(chFFt_x,chAvgFft,label="REAL DATA AVG FFT "+str(chanName)+" FREQ "+str(expFreq) + "MHz")
+  
+  #carrier analysis
+  """
+  expFreq = 5
+  distFreq = 0.1
+  #find max tone in individual FFT
+  maxPsd,maxPsd_x = findMaxPsd(chFFt_x,chAvgFft,expFreq-0.045,expFreq+0.045)
+  print("MAX",maxPsd,maxPsd_x)
+  #find sub tone
+  maxSubPsd,maxSuPsd_x = findMaxPsd(chFFt_x,chAvgFft,expFreq-distFreq-0.04,expFreq-distFreq+0.04)
+  print("LEFT",maxSubPsd,maxSuPsd_x)  
+  #find sub tone
+  maxSubPsd,maxSuPsd_x = findMaxPsd(chFFt_x,chAvgFft,expFreq+distFreq-0.04,expFreq+distFreq+0.04)
+  print("RIGHT",maxSubPsd,maxSuPsd_x)  
+  """
+  #plotQuick(chFFt_x,chAvgFft,label="REAL DATA AVG FFT "+str(chanName))
   #simpleTest(cv4ProcessFile.runResultsDict)
   
   return

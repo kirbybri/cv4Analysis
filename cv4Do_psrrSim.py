@@ -54,7 +54,7 @@ def findMaxPsd(chFFt_x,chFft_y,lowFreq,highFreq):
     if psdVal > maxPsd :
       maxPsd = psdVal
       maxPsd_x = freq
-  print("MAX",maxPsd,maxPsd_x)
+  #print("MAX",maxPsd,maxPsd_x)
   return maxPsd,maxPsd_x
     
 def doSimFFt(sineAmp,sineFreq, cv4ProcessFile,chanName):
@@ -196,7 +196,7 @@ def doSimFFt_carrier(sineAmp,sineFreq,disturbAmp,disturbFreq,cv4ProcessFile,chan
   #find noise floor
   noiseFloorPsd = []
   for psdNum,freq in enumerate(chFFt_x) :
-    if freq < 5 : continue
+    if freq < 10 : continue
     if freq == maxPsd_x : continue
     psdVal = chAvgFft[psdNum]
     noiseFloorPsd.append(psdVal)
@@ -231,12 +231,12 @@ def main():
     print("NO RESULTS")
     return
 
-  sineFreq = 10.0E+6
-  sineAmps = []
-  for num in range(1,10,1):
-    sineAmp = num * 0.05
-    sineAmps.append(sineAmp)
-  #sineAmps = [0.161]
+  sineFreq = 0.25E+6
+  #sineAmps = []
+  #for num in range(1,20,1):
+  #  sineAmp = num * 0.01
+  # sineAmps.append(sineAmp)
+  sineAmps = [0.173]
   #sineAmps = [0.0]
   diffs = []
   for sineAmp in sineAmps :
