@@ -20,21 +20,21 @@ def getPrimes():
   return
 
 def getFreqs():
-  sampFreq = 36.0
+  sampFreq = 40.0
   #sampFreq = 40.080169721886016
 
-  targetFreq = 5
+  targetFreq = 2.
   scaleFactor = 1.
   for prime in primes :
-    for numSamp in range(4000,8100,1):
+    for numSamp in range(8000,8001,1):
     #for numSamp in range(512,1048,1):
       val = prime*sampFreq/float(numSamp)
       val = val 
       length = len(str(val).split('.')[1])
-      if (val > targetFreq + 0.05) or ( val < targetFreq - 0.05 ) :continue
+      if (val > targetFreq + 0.5) or ( val < targetFreq - 0.5 ) :continue
       if val == targetFreq : continue
       #if (val < 0.95) or (val > 1.05) : continue
-      if length > 12 : continue
+      #if length > 12 : continue
       print(prime,"\t",numSamp,"\t", val ,"\t", round(val - targetFreq,3),"\t",val*scaleFactor,"\t",val*scaleFactor - targetFreq )
 
 def getSineWave():

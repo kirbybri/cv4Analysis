@@ -103,7 +103,7 @@ def doSimFFt(sineAmp,sineFreq, cv4ProcessFile,chanName):
   chAvgFft = np.mean(chFftList,axis=0)
 
   #find tone
-  maxPsd,maxPsd_x = findMaxPsd(chFFt_x,chAvgFft,sineFreq/1.E6-0.2,sineFreq/1.E6+0.2)
+  maxPsd,maxPsd_x = findMaxPsd(chFFt_x,chAvgFft,sineFreq/1.E6-0.01,sineFreq/1.E6+0.01)
   """
   print("HERE",maxPsd,maxPsd_x)
   maxPsd = None
@@ -180,6 +180,7 @@ def doSimFFt_carrier(sineAmp,sineFreq,disturbAmp,disturbFreq,cv4ProcessFile,chan
   chAvgFft = np.mean(chFftList,axis=0)
 
   #find tone
+  findMaxPsd(chFFt_x,chFft_y,lowFreq,highFreq)
   maxPsd = None
   maxPsd_x = None
   for psdNum,freq in enumerate(chFFt_x) :
@@ -231,12 +232,12 @@ def main():
     print("NO RESULTS")
     return
 
-  sineFreq = 0.25E+6
+  sineFreq = 0.305E+6
   #sineAmps = []
   #for num in range(1,20,1):
   #  sineAmp = num * 0.01
   # sineAmps.append(sineAmp)
-  sineAmps = [0.173]
+  sineAmps = [1.166]
   #sineAmps = [0.0]
   diffs = []
   for sineAmp in sineAmps :

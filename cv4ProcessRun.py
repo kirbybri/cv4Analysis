@@ -242,7 +242,7 @@ def main():
     for measNum in cv4AnalyzeWaveform.runResultsDict["results"] :
       #if measNum != "Measurement_891" : continue
       doPlot = True
-      meanvals, stdvals, maxval,minval,enob = cv4AnalyzeWaveform.viewWaveform(chId=chanName,measNum=measNum,doPrint=True,doPlot=doPlot)
+      meanvals, stdvals, maxval,minval,enob,sinad = cv4AnalyzeWaveform.viewWaveform(chId=chanName,measNum=measNum,doPrint=False,doPlot=doPlot)
     return None
     
   if False :

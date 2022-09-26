@@ -5,6 +5,7 @@ import sys
 import numpy as np
 from math import *
 import matplotlib.pyplot as plt
+from scipy.signal import butter,filtfilt
 
 from cv4ProcessFile import CV4_PROCESS_FILE
 from cv4AnalyzeWaveform import CV4_ANALYZE_WAVEFORM
@@ -31,8 +32,8 @@ def plotQuick(vals_x,vals_y,label=""):
     #axes.set_title("COLUTA ENOB VS AWG AMP", fontsize=20)
     axes.tick_params(axis="x", labelsize=12)
     axes.tick_params(axis="y", labelsize=12)
-    #axes.set_xlim(0,1)
-    #axes[0].set_ylim(17087-50,17087+50)    
+    axes.set_xlim(0,1000)
+    #axes.set_ylim(15000,16500)    
     axes.grid()
     #axes.set_ylim(6,12)
     fig.suptitle(label, fontsize=16)
@@ -122,7 +123,6 @@ def doFftStudy(cv4ProcessFile,chanName,expFreq):
   
   #expFreq = 0.115
   maxPsd,maxPsd_x = findMaxPsd(chFFt_x,chAvgFft,expFreq-0.004,expFreq+0.004)
-  maxPsd = round(maxPsd,2)
   print("MAX",maxPsd,maxPsd_x)
   """
   #find noise floor
@@ -135,7 +135,7 @@ def doFftStudy(cv4ProcessFile,chanName,expFreq):
   print("NOISE FLOOR",np.mean(noiseFloorPsd),"STD",np.std(noiseFloorPsd))
   print("DIFFERENCE", maxPsd - np.mean(noiseFloorPsd) )
   """
-  plotQuick(chFFt_x,chAvgFft,label="REAL DATA AVG FFT "+str(chanName)+" FREQ "+str(expFreq) + "MHz")
+  #plotQuick(chFFt_x,chAvgFft,label="REAL DATA AVG FFT "+str(chanName)+" FREQ "+str(expFreq) + "MHz")
   return maxPsd,maxPsd_x
   #carrier analysis
   """
@@ -153,6 +153,14 @@ def doFftStudy(cv4ProcessFile,chanName,expFreq):
   """
   #plotQuick(chFFt_x,chAvgFft,label="REAL DATA AVG FFT "+str(chanName))
   return
+
+def butter_lowpass_filter(data, cutoff, fs, order):
+    nyq = fs/2.
+    normal_cutoff = cutoff / nyq
+    # Get the filter coefficients 
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    y = filtfilt(b, a, data)
+    return y
 
 def main():
   print("HELLO")
@@ -182,14 +190,27 @@ def main():
     return
   
   expFreq = 0.305
-  #expFreq = 4.985
-  #chanList = ["channel1","channel2","channel3","channel4","channel5","channel6","channel7","channel8"]
-  chanList = ["channel1"]
+  chanList = ["channel4"]
   results = {}
+  cv4AnalyzeWaveform = CV4_ANALYZE_WAVEFORM("")
+  cv4AnalyzeWaveform.runResultsDict = cv4ProcessFile.runResultsDict
   for chanName in chanList :
-    maxPsd,maxPsd_x = doFftStudy(cv4ProcessFile,chanName,expFreq)
-    results[chanName] = {"maxPsd":maxPsd,"freq":maxPsd_x}
-  print(results)
+    for measNum in cv4AnalyzeWaveform.runResultsDict["results"] :
+      #if measNum != "Measurement_891" : continue
+      #doPlot = True
+      #meanvals, stdvals, maxval,minval,enob = cv4AnalyzeWaveform.viewWaveform(chId=chanName,measNum=measNum,doPrint=True,doPlot=doPlot)
+      #return None
+      vals = cv4AnalyzeWaveform.getMeasChData(chId=chanName,measNum=measNum)
+      cutoff = 3E+6
+      fs = 40E+6
+      order = 2
+      filtVals = butter_lowpass_filter(vals, cutoff, fs, order)
+      #filtVals = scipy.signal.wiener(vals)
+      times = []
+      for num in range(0,len(vals),1):
+        times.append(num)
+      #plotQuick(times,vals,label="")
+      plotQuick(times,filtVals,label="")
 
   #simpleTest(cv4ProcessFile.runResultsDict)
   

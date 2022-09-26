@@ -71,16 +71,20 @@ class CV4_ANALYZE_WAVEFORM(object):
     if np.max(fftWf_y) <= 0 :
       return psd_x,psd,0,0
 
-    #fourier_fftWf_y = fftWf_y/np.max(fftWf_y)
-    fourier_fftWf_y = fftWf_y
+    fourier_fftWf_y = fftWf_y/np.max(fftWf_y)
+    #fourier_fftWf_y = fftWf_y #raw fft
+    #fourier_fftWf_y = 2.0 * fftWf_y / len(vals)
     for sampNum,samp in enumerate(fourier_fftWf_y) :
       if sampNum == 0 :
         continue
       else:
         psd_x.append( fftWf_x[sampNum] )
         psd.append( 20*np.log10(samp) )
+        #psd.append( samp )
     sinad = self.SINAD(fourier_fftWf_y)
     enob = self.ENOB(fourier_fftWf_y)
+    #sinad = None
+    #enob = None
     #print ("ENOB\t",enob)
     return psd_x,psd,sinad,enob
 
@@ -171,7 +175,7 @@ class CV4_ANALYZE_WAVEFORM(object):
     #axes[0].set_xlim(3600,6400)
     #axes[0].set_xlim(16077,16094)
     #axes[0].set_ylim(17087-50,17087+50)
-    axes[1].plot(psd_x,psd,"-")
+    #axes[1].plot(psd_x,psd,"-")
     axes[1].set_xlabel('Frequency [MHz]', horizontalalignment='right', fontsize=20)
     axes[1].set_ylabel('PSD [dB]', horizontalalignment='left', fontsize=20)
     axes[1].set_title("PSD", fontsize=20)
@@ -269,9 +273,9 @@ class CV4_ANALYZE_WAVEFORM(object):
       vals_x = [num for num,x in enumerate(vals) ]      
       #self.plotVals(vals_x=vals_x[0:75],vals_y=vals[0:75],label="")
       #self.plotVals(vals_x=vals_x,vals_y=vals,label="")
-      self.plotValsFft(measNum="",vals_x=vals_x[0:200],vals_y=vals[0:200],psd_x=psd_x,psd=psd,label="")
+      self.plotValsFft(measNum="",vals_x=vals_x,vals_y=vals,psd_x=psd_x,psd=psd,label="")
     #return np.mean(vals)
-    return np.mean(vals), np.std(vals), np.max(vals),np.min(vals),enob
+    return np.mean(vals), np.std(vals), np.max(vals),np.min(vals),enob,sinad
 
 
   def dumpFile(self):
