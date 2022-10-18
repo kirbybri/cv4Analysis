@@ -177,7 +177,7 @@ def plotResids(times,resids,psd_x,psd):
     axes[1].tick_params(axis="y", labelsize=12)
 
     axes[1].set_title("Fit Residuals PSD")
-    axes[1].set_xlim(0,1)
+    #axes[1].set_xlim(0,1)
 
     fig.tight_layout()
     plt.show()    
@@ -188,13 +188,14 @@ def doSineFit(vals):
         sampVals.append(val)
       print(len(vals),len(sampVals))    
       psd_x,psd,phase,sinad,enob = getFftWaveform(vals)
-      plotVals([x*25E+9 for x in timeVals][0:400],sampVals[0:400],psd_x,psd)
-    
+      #plotVals([x*25E+9 for x in timeVals][0:400],sampVals[0:400],psd_x,psd)
+      
       #infer sine parameters
       maxPsd = psd[1]
       maxFreq = psd_x[1]
       maxPhase = phase[1]
       for freqNum,freq in enumerate(psd_x):
+        #print(freqNum,freq,phase[freqNum])
         if psd[freqNum] > maxPsd :
             maxPsd = psd[freqNum]
             maxFreq = freq
@@ -202,23 +203,25 @@ def doSineFit(vals):
       maxFreq = maxFreq*1.E+6 #convert to Hz
       ampEst = (np.max(sampVals) - np.min(sampVals))/2.
       offsetEst = np.mean(sampVals)
-      m = Minuit(LSQ, amp=ampEst, freq=maxFreq*2.*np.pi, phase=maxPhase*2.*np.pi-np.pi,offset=offsetEst)
+      m = Minuit(LSQ, amp=ampEst, freq=maxFreq*2.*np.pi, phase=maxPhase-np.pi/2.,offset=offsetEst)
       #print( m.fixed )
       #m.fixed[0] = True
       #m.fixed[1] = True  
       #m.fixed[2] = True  
-      #m.fixed[3] = True
+      m.fixed[3] = True
       m.errors[0] = 10.
-      m.errors[1] = 1.
-      m.errors[2] = 6.
+      m.errors[1] = 10.
+      m.errors[2] = 0.1
       #print( m.fixed )
+      print(m.values)
+      m.simplex()  # run optimiser 
       print(m.values)
       m.migrad()  # run optimiser
       print(m.values)  # x: 2, y: 3, z: 4
       m.hesse()   # run covariance estimator
       print(m.errors)  # x: 1, y: 1, z: 1
       #plotQuick(plot_x,plot_y,label="COLUTA Ch1,5.005MHz Sine Wave,8000 Samples")
-      print("AVG",np.mean(plot_y),"RMS",np.std(plot_y))
+      #print("AVG",np.mean(plot_y),"RMS",np.std(plot_y))
       fitAmp = m.values[0]
       fitFreq = m.values[1]
       fitPhase = m.values[2]
@@ -226,6 +229,7 @@ def doSineFit(vals):
       print(fitAmp)
       resids = getResid(fitAmp,fitFreq,fitPhase,fitOffset)
       psd_x_resid,psd_resid,phase_resid,sinad_resid,enob_resid = getFftWaveform(resids)
+      print( "RESIDS",np.mean(resids),np.std(resids))
       plotResids([x*25E+9 for x in timeVals][0:400],resids[0:400],psd_x_resid,psd_resid)    
 
 def findMaxPsd(chFFt_x,chFft_y,lowFreq,highFreq):
@@ -282,27 +286,33 @@ def main():
     psdDiff = []
     for measNum in cv4AnalyzeWaveform.runResultsDict["results"] :
       awgAmp = float(cv4AnalyzeWaveform.runResultsDict["results"][measNum]["attrs"]['awgAmp'])
-      meanvals, stdvals, maxval,minval,enob,sinad = cv4AnalyzeWaveform.viewWaveform(chId=chanName,measNum=measNum,doPrint=False,doPlot=True)
-      print( measNum , enob )
-      plot_x.append(awgAmp)
-      plot_y.append(enob)
+      #meanvals, stdvals, maxval,minval,enob,sinad = cv4AnalyzeWaveform.viewWaveform(chId=chanName,measNum=measNum,doPrint=False,doPlot=False)
+      #print( measNum , enob )
+      #plot_x.append(awgAmp)
+      #plot_y.append(enob)
       #continue
       #fit below
       #timeVals,sampVals = getSineWave()
       timeVals.clear()
       sampVals.clear()
       vals = cv4AnalyzeWaveform.getMeasChData(chId=chanName,measNum=measNum)
+      doSineFit(vals)
+      return
+      continue
+    
+    
       for num,val in enumerate(vals):
         timeVals.append(num*25.E-9)
         sampVals.append(val)
+      
       #plotVals([x*25E+9 for x in timeVals][0:400],sampVals[0:400],psd_x,psd)
-      continue
-      print(len(vals),len(sampVals))    
-      psd_x,psd,phase,sinad,enob = getFftWaveform(vals)
-      maxPsd,maxPsd_x = findMaxPsd(psd_x,psd,14.5,15.5)
+      #continue
+      #print(len(vals),len(sampVals))    
+      #psd_x,psd,phase,sinad,enob = getFftWaveform(vals)
+      #maxPsd,maxPsd_x = findMaxPsd(psd_x,psd,14.5,15.5)
       #print(maxPsd,maxPsd_x)
-      amp_x.append( np.std(vals)*np.sqrt(2)*2 )
-      psdDiff.append(maxPsd)
+      #amp_x.append( np.std(vals)*np.sqrt(2)*2 )
+      #psdDiff.append(maxPsd)
       #plotVals([x*25E+9 for x in timeVals][0:400],sampVals[0:400],psd_x,psd)
     plotQuick2(amp_x,psdDiff)
 
