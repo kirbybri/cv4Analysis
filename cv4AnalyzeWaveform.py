@@ -175,7 +175,7 @@ class CV4_ANALYZE_WAVEFORM(object):
     #axes[0].set_xlim(3600,6400)
     #axes[0].set_xlim(16077,16094)
     #axes[0].set_ylim(17087-50,17087+50)
-    #axes[1].plot(psd_x,psd,"-")
+    axes[1].plot(psd_x,psd,"-")
     axes[1].set_xlabel('Frequency [MHz]', horizontalalignment='right', fontsize=20)
     axes[1].set_ylabel('PSD [dB]', horizontalalignment='left', fontsize=20)
     axes[1].set_title("PSD", fontsize=20)

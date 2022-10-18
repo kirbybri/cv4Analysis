@@ -34,6 +34,9 @@ def calcPsrr(dataOn,dataOff,dIn) :
       result[chanName] = psrrDiff
     return result
 
+def convertSnrToEnob(snr):
+    return (snr - 1.76)/6.02
+
 def main():
 
     #115kHz no disturbance 
@@ -135,6 +138,14 @@ def main():
     freqCarrier = [115,305,505,755,2005,3005,8005,15005]
     psrrCarrier = [58.1,56.2,52.6,53.3,78,78.2,94.8,83.6]
 
+    #simulation results
+    data_freq_5mV= [100.000 ,      460.000]
+    data_PSRR_5mV= [66.6864  ,     72.732]
+    data_freq_15mV = [100.000 ,    1.02e+03  ,   7.98e+03  ,  1.902e+04]
+    data_PSRR_15mV = [64.1863  ,    75.5066   ,   63.1953   ,   53.7906]
+    data_freq_25mV = [100.000   ,    460.000   ,  1.02e+03   ,  7.98e+03  ,   1.902e+04]
+    data_PSRR_25mV = [63.6652    ,  70.0291     , 74.6196     , 61.7449     , 53.0836]
+    
     chLabels = {"channel1":"Channel 1","channel2":"Channel 2","channel3":"Channel 3","channel4":"Channel 4","channel5":"Channel 5","channel6":"Channel 6","channel7":"Channel 7","channel8":"Channel 8"}
 
     fig, axes = plt.subplots(1,1,figsize=(10, 6))
@@ -142,6 +153,9 @@ def main():
       chLabel = chLabels[chanName]
       axes.plot(chResults[chanName]["freq"],chResults[chanName]["psrr"],".-",label=chLabel)
     axes.plot(freqCarrier,psrrCarrier,".-",label="Channel 2 Carrier")
+    axes.plot(data_freq_5mV,data_PSRR_5mV,".-",label="Simulation 5mV")
+    axes.plot(data_freq_15mV,data_PSRR_15mV,".-",label="Simulation 15mV")
+    axes.plot(data_freq_25mV,data_PSRR_25mV,".-",label="Simulation 25mV")
     axes.set_xlabel('Frequency [kHz]', fontsize=20)
     axes.set_ylabel('PSRR [dB]',  fontsize=20)
     axes.tick_params(axis="x", labelsize=12)
@@ -151,7 +165,7 @@ def main():
     plt.ylim(00, 100)
     axes.set_xscale("log")
     axes.grid()
-    axes.legend()
+    axes.legend(ncols=2)
 
     fig.tight_layout()
     plt.show()
